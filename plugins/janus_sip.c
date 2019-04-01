@@ -429,7 +429,8 @@
 #include "../sdp-utils.h"
 #include "../utils.h"
 #include "../ip-utils.h"
-
+#include "../b64.h"
+#include "../aes.h"
 
 /* Plugin information */
 #define JANUS_SIP_VERSION			7
@@ -2138,8 +2139,25 @@ static void *janus_sip_handler(void *data) {
 					goto error;
 				}
 				if(secret) {
-					secret_text = json_string_value(secret);
+					const char * temp_secret_text = json_string_value(secret);
+					const uint8_t key[] = "thisisasecretkey";
+					const uint8_t iv[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+					size_t decodedCipherLength = 0;
+					unsigned char * decodedCipherInText = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &decodedCipherLength);
+					uint8_t buffer[decodedCipherLength];
+
+					// decode AES
+					AES_CBC_decrypt_buffer(buffer, decodedCipherInText, decodedCipherLength, key, iv);
+					
+					unsigned char *decrypted = (unsigned char*)malloc(decodedCipherLength);
+					memcpy(decrypted, (char*)buffer, decodedCipherLength);
+
+					// secret_text = json_string_value(secret);
+					secret_text = decrypted;
 					secret_type = janus_sip_secret_type_plaintext;
+
+					free(decrypted);
+					free(decodedCipherInText);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
