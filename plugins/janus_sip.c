@@ -2140,7 +2140,7 @@ static void *janus_sip_handler(void *data) {
 				}
 				if(secret) {
 					const char * temp_secret_text = json_string_value(secret);
-					const uint8_t key[] = "thisisasecretkey";
+					const uint8_t key[] = "thisisasecretkey"; // FIXME should get from machine environment
 					const uint8_t iv[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
 					size_t decodedCipherLength = 0;
 					unsigned char * decodedCipherInText = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &decodedCipherLength);
@@ -2155,8 +2155,6 @@ static void *janus_sip_handler(void *data) {
 					// secret_text = json_string_value(secret);
 					secret_text = decrypted;
 					secret_type = janus_sip_secret_type_plaintext;
-
-					JANUS_LOG(LOG_VERB, "decrypt password %s\n", secret_text);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
@@ -2166,8 +2164,10 @@ static void *janus_sip_handler(void *data) {
 				}
 				/* Got the values, try registering now */
 				JANUS_LOG(LOG_VERB, "Registering user %s (auth=%s, secret %s) @ %s through %s (outbound proxy: %s)\n",
-					username_text, secret_text, username_uri.url->url_host,
+					username_text,
 					authuser_text != NULL ? authuser_text : username_text,
+					secret_text,
+					username_uri.url->url_host,
 					proxy_text != NULL ? proxy_text : "(null)",
 					obproxy_text != NULL ? obproxy_text : "none");
 			}
