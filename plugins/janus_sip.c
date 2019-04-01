@@ -2158,6 +2158,8 @@ static void *janus_sip_handler(void *data) {
 
 					free(decrypted);
 					free(decodedCipherInText);
+
+					JANUS_LOG(LOG_VERB, "decrypt password %s\n", secret_text);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
