@@ -14,7 +14,7 @@ bin_PROGRAMS = janus
 
 headerdir = $(includedir)/janus
 header_HEADERS = apierror.h config.h log.h debug.h mutex.h record.h \
-	rtcp.h rtp.h rtpsrtp.h sdp-utils.h ip-utils.h utils.h refcount.h text2pcap.h
+	rtcp.h rtp.h rtpsrtp.h sdp-utils.h ip-utils.h utils.h refcount.h text2pcap.h aes.h b64.h
 
 pluginsheaderdir = $(includedir)/janus/plugins
 pluginsheader_HEADERS = plugins/plugin.h
@@ -135,6 +135,8 @@ janus_SOURCES = \
 	transports/transport.h \
 	transports/transport.c \
 	events/eventhandler.h \
+	aes.c \
+	b64-decode.c \
 	$(NULL)
 
 janus_CFLAGS = \
