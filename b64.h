@@ -5,8 +5,8 @@
  * copyright (c) 2014 joseph werle
  */
 
-#ifndef B64_H
-#define B64_H 1
+#ifndef _JANUS_B64_H
+#define _JANUS_B64_H 1
 
 /**
  *  Memory allocation functions to use. You can define b64_malloc and

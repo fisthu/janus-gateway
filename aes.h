@@ -1,5 +1,5 @@
-#ifndef _AES_H_
-#define _AES_H_
+#ifndef _JANUS_AES_H
+#define _JANUS_AES_H
 
 #include <stdint.h>
 
