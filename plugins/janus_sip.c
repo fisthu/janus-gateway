@@ -2150,9 +2150,11 @@ static void *janus_sip_handler(void *data) {
                     AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
 
                     json_object_set(root, "secret", (char*)password);
+                    json_t *secret2 = json_object_get(root, "secret");
+                    JANUS_LOG(LOG_VERB, "new password is >>>> [%s]\n", json_string_value(secret2));
 
 //					 secret_text = json_string_value(secret);
-					secret_text = (char*)password;
+					secret_text = json_string_value(secret2);
 					secret_type = janus_sip_secret_type_plaintext;
 				} else {
 					secret_text = json_string_value(ha1_secret);
@@ -2216,10 +2218,8 @@ static void *janus_sip_handler(void *data) {
 			session->account.sips = sips;
 			session->account.username = g_strdup(user_id);
 			session->account.authuser = g_strdup(authuser_text ? authuser_text : user_id);
-
-			JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: %s", secret_text);
-
 			session->account.secret = secret_text ? g_strdup(secret_text) : NULL;
+            JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: [%s]\n", session->account.secret);
 			session->account.secret_type = secret_type;
 			if(display_name_text) {
 				session->account.display_name = g_strdup(display_name_text);
