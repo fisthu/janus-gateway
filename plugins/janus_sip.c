@@ -440,6 +440,9 @@
 #define JANUS_SIP_AUTHOR			"Meetecho s.r.l."
 #define JANUS_SIP_PACKAGE			"janus.plugin.sip"
 
+const uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
+const uint8_t JET_IV[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+
 /* Plugin methods */
 janus_plugin *create(void);
 int janus_sip_init(janus_callbacks *callback, const char *config_path);
@@ -2140,20 +2143,14 @@ static void *janus_sip_handler(void *data) {
 				}
 				if(secret) {
 					const char * temp_secret_text = json_string_value(secret);
-					const uint8_t key[] = "thisisasecretkey"; // FIXME should get from machine environment
-					const uint8_t iv[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-					size_t decodedCipherLength = 0;
-					unsigned char * decodedCipherInText = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &decodedCipherLength);
-					uint8_t buffer[decodedCipherLength];
-
-					// decode AES
-					AES_CBC_decrypt_buffer(buffer, decodedCipherInText, decodedCipherLength, key, iv);
-					
-					unsigned char *decrypted = (unsigned char*)malloc(decodedCipherLength);
-					memcpy(decrypted, (char*)buffer, decodedCipherLength);
+					size_t cipher_length = 0;
+					unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+                    struct AES_ctx ctx;
+                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
+                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
 
 					// secret_text = json_string_value(secret);
-					secret_text = decrypted;
+					secret_text = (char*)password;
 					secret_type = janus_sip_secret_type_plaintext;
 				} else {
 					secret_text = json_string_value(ha1_secret);
