@@ -2142,15 +2142,15 @@ static void *janus_sip_handler(void *data) {
 					goto error;
 				}
 				if(secret) {
-//					const char * temp_secret_text = json_string_value(secret);
-//					size_t cipher_length = 0;
-//					unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-//                    struct AES_ctx ctx;
-//                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
-//                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
+					const char * temp_secret_text = json_string_value(secret);
+					size_t cipher_length = 0;
+					unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+                    struct AES_ctx ctx;
+                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
+                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
 
-					 secret_text = json_string_value(secret);
-//					secret_text = (char*)password;
+//					 secret_text = json_string_value(secret);
+					secret_text = (char*)password;
 					secret_type = janus_sip_secret_type_plaintext;
 				} else {
 					secret_text = json_string_value(ha1_secret);
@@ -2531,8 +2531,17 @@ static void *janus_sip_handler(void *data) {
 			}
 			if(secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (secret) for authenticating the INVITE\n");
+
+                const char * temp_secret_text = json_string_value(secret);
+                size_t cipher_length = 0;
+                unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+                struct AES_ctx ctx;
+                AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
+                AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
+
 				g_free(session->account.secret);
-				session->account.secret = g_strdup(json_string_value(secret));
+//				session->account.secret = g_strdup(json_string_value(secret));
+				session->account.secret = g_strdup((char*)password);
 				session->account.secret_type = janus_sip_secret_type_plaintext;
 			} else if(ha1_secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (ha1_secret) for authenticating the INVITE\n");
