@@ -2149,14 +2149,11 @@ static void *janus_sip_handler(void *data) {
                     AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
                     AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
 
-                    json_object_set(root, "secret", json_string((char*)password));
+//                    json_object_set(root, "secret", json_string((char*)password));
+                    json_object_set_new(root, "secret", json_string((char*)password));
 
                     json_t *secret2 = json_object_get(root, "secret");
                     JANUS_LOG(LOG_VERB, "new password is >>>> [%s]\n", json_string_value(secret2));
-                    if (json_string_value(secret2) == NULL) {
-                        JANUS_LOG(LOG_VERB, "new password is olalalala >>>> [%s]\n", json_string_value(secret2));
-                        json_object_set_new(root, "secret", json_string((char*)password));
-                    }
 
 //					 secret_text = json_string_value(secret);
 					secret_text = json_string_value(secret2);
