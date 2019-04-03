@@ -2216,6 +2216,9 @@ static void *janus_sip_handler(void *data) {
 			session->account.sips = sips;
 			session->account.username = g_strdup(user_id);
 			session->account.authuser = g_strdup(authuser_text ? authuser_text : user_id);
+
+			JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: %s", secret_text);
+
 			session->account.secret = secret_text ? g_strdup(secret_text) : NULL;
 			session->account.secret_type = secret_type;
 			if(display_name_text) {
@@ -2540,7 +2543,7 @@ static void *janus_sip_handler(void *data) {
 //                struct AES_ctx ctx;
 //                AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
 //                AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
-
+                JANUS_LOG(LOG_VERB, ">>>>>>>>>> password22222: %s", json_string_value(secret));
 				g_free(session->account.secret);
 				session->account.secret = g_strdup(json_string_value(secret));
 //				session->account.secret = g_strdup((char*)password);
