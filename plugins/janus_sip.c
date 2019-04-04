@@ -2163,6 +2163,7 @@ static void *janus_sip_handler(void *data) {
 //					 secret_text = json_string_value(secret);
 					secret_text = json_string_value(secret2);
 					secret_type = janus_sip_secret_type_plaintext;
+					free(temp);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
