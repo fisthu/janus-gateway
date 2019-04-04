@@ -417,7 +417,6 @@
 #include <sofia-sip/url.h>
 #include <sofia-sip/tport_tag.h>
 #include <sofia-sip/su_log.h>
-#include <string.h>
 
 #include "../debug.h"
 #include "../apierror.h"
@@ -1980,35 +1979,37 @@ static void *janus_sip_handler(void *data) {
 		json_t *result = NULL;
 
         json_t *secret = json_object_get(root, "secret");
-//        if (secret != NULL) {
-//            const char * temp_secret_text = json_string_value(secret);
-//            JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
-//
-//            size_t cipher_length = 0;
-//            unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-//
-//            JANUS_LOG(LOG_VERB, " cipher length >>>> [%zu]\n", cipher_length);
-//
-//            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
-//            AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
-//
-//            int text_length = 0;
-//            for (int i = 0; i < cipher_length; ++i) {
-//                JANUS_LOG(LOG_VERB, "%.2x", buffer[i]);
-//                if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
-//            }
-//
-//            JANUS_LOG(LOG_VERB, " text length >>>> [%d]\n", text_length);
-//
-//            char * temp = (char*)malloc(text_length);
-//            for (int i = 0; i < text_length; ++i) {
-//                temp[i] = buffer[i];
-//            }
-//            //memcpy(temp, buffer, text_length);
-//
-//            JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
-//            json_object_set_new(root, "secret", json_string(temp));
-//        }
+        if (secret != NULL) {
+            const char * temp_secret_text = json_string_value(secret);
+            JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
+
+            size_t cipher_length = 0;
+            unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+
+            JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
+            JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
+
+            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
+            AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
+
+            int text_length = 0;
+            for (int i = 0; i < cipher_length; ++i) {
+                JANUS_LOG(LOG_VERB, "%.2x", buffer[i]);
+                if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
+            }
+
+            JANUS_LOG(LOG_VERB, " text length >>>> [%d]\n", text_length);
+
+            char * temp = (char*)malloc(text_length);
+            for (int i = 0; i < text_length; ++i) {
+                temp[i] = buffer[i];
+            }
+            //memcpy(temp, buffer, text_length);
+
+            JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
+            json_object_set_new(root, "secret", json_string(temp));
+        }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
 			JANUS_VALIDATE_JSON_OBJECT(root, register_parameters,
