@@ -417,6 +417,7 @@
 #include <sofia-sip/url.h>
 #include <sofia-sip/tport_tag.h>
 #include <sofia-sip/su_log.h>
+#include <string.h>
 
 #include "../debug.h"
 #include "../apierror.h"
@@ -440,8 +441,8 @@
 #define JANUS_SIP_AUTHOR			"Meetecho s.r.l."
 #define JANUS_SIP_PACKAGE			"janus.plugin.sip"
 
-const uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
-const uint8_t JET_IV[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+static const uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
+static const uint8_t JET_IV[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
 
 /* Plugin methods */
 janus_plugin *create(void);
@@ -1987,8 +1988,8 @@ static void *janus_sip_handler(void *data) {
             unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
 
             JANUS_LOG(LOG_VERB, " cipher length >>>> [%zu]\n", cipher_length);
-            uint8_t buffer[cipher_length];
-            // decode AES
+
+            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
 
             int text_length = 0;
@@ -2000,7 +2001,7 @@ static void *janus_sip_handler(void *data) {
             memcpy(temp, buffer, text_length);
 
             JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
-            json_object_set(root, "secret", json_string(temp));
+            json_object_set_new(root, "secret", json_string(temp));
         }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
@@ -2548,24 +2549,6 @@ static void *janus_sip_handler(void *data) {
 			}
 			if(secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (secret) for authenticating the INVITE\n");
-
-//                const char * temp_secret_text = json_string_value(secret);
-//                JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
-//
-//                size_t cipher_length = 0;
-//                unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-//                uint8_t buffer[cipher_length];
-//                // decode AES
-//                AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
-//
-//                int text_length = 0;
-//                for (int i = 0; i < cipher_length; ++i) {
-//                    if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
-//                }
-//
-//                char * temp = (char*)malloc(text_length);
-//                memcpy(temp, buffer, text_length);
-
 				g_free(session->account.secret);
 				session->account.secret = g_strdup(json_string_value(secret));
 				session->account.secret_type = janus_sip_secret_type_plaintext;
