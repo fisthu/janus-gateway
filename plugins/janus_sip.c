@@ -2155,6 +2155,8 @@ static void *janus_sip_handler(void *data) {
                     char * temp = (char*)malloc(text_length);
                     memcpy(temp, password, text_length);
 
+                    JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
+
                     json_object_set(root, "secret", json_string(temp));
 
                     json_t *secret2 = json_object_get(root, "secret");
@@ -2163,7 +2165,7 @@ static void *janus_sip_handler(void *data) {
 //					 secret_text = json_string_value(secret);
 					secret_text = json_string_value(secret2);
 					secret_type = janus_sip_secret_type_plaintext;
-					free(temp);
+//					free(temp);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
