@@ -2232,7 +2232,7 @@ static void *janus_sip_handler(void *data) {
 			session->account.username = g_strdup(user_id);
 			session->account.authuser = g_strdup(authuser_text ? authuser_text : user_id);
 			session->account.secret = secret_text ? g_strdup(secret_text) : NULL;
-            JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: [%s]\n", session->account.secret);
+            //JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: [%s]\n", session->account.secret);
 			session->account.secret_type = secret_type;
 			if(display_name_text) {
 				session->account.display_name = g_strdup(display_name_text);
