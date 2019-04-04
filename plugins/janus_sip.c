@@ -1997,14 +1997,16 @@ static void *janus_sip_handler(void *data) {
 
             int text_length = 0;
             for (int i = 0; i < cipher_length; ++i) {
-                JANUS_LOG(LOG_VERB, "%.2x", buffer[i]);
-                if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
+                if (buffer[i] != 0x10 && buffer[i] != 0x20) {
+                    JANUS_LOG(LOG_VERB, "%c", buffer[i]);
+                    text_length++;
+                }
             }
 
-            JANUS_LOG(LOG_VERB, " text length >>>> [%d]\n", text_length);
+            JANUS_LOG(LOG_VERB, "\n text length >>>> [%d]\n", text_length);
 
-            char * temp = (char*)malloc(text_length);
-            for (int i = 0; i < text_length; ++i) {
+            char temp[text_length];
+            for (int i = 0; i < text_length; i++) {
                 temp[i] = buffer[i];
             }
             //memcpy(temp, buffer, text_length);
