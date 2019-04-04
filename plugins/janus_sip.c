@@ -440,9 +440,6 @@
 #define JANUS_SIP_AUTHOR			"Meetecho s.r.l."
 #define JANUS_SIP_PACKAGE			"janus.plugin.sip"
 
-static const uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
-static const uint8_t JET_IV[]= {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-
 /* Plugin methods */
 janus_plugin *create(void);
 int janus_sip_init(janus_callbacks *callback, const char *config_path);
@@ -1981,6 +1978,8 @@ static void *janus_sip_handler(void *data) {
         json_t *secret = json_object_get(root, "secret");
         if (secret != NULL) {
             const char * temp_secret_text = json_string_value(secret);
+            uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
+            uint8_t JET_IV[]= "0123456789ABCDEF";
             JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
 
             size_t cipher_length = 0;
@@ -1990,6 +1989,8 @@ static void *janus_sip_handler(void *data) {
             JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
 
             uint8_t *buffer = (uint8_t*) malloc(cipher_length);
+            JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
+            JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
             JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
