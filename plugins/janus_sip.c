@@ -1932,9 +1932,7 @@ static void *janus_sip_handler(void *data) {
 
     uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
     uint8_t JET_IV[]= "0123456789ABCDEF";
-
     struct AES_ctx ctx;
-    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
 
     while(g_atomic_int_get(&initialized) && !g_atomic_int_get(&stopping)) {
 		msg = g_async_queue_pop(messages);
@@ -2005,6 +2003,7 @@ static void *janus_sip_handler(void *data) {
 //
 //            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
+            AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
             AES_CBC_decrypt_buffer(&ctx, cipher_text, cipher_length);
 
             json_object_set(root, "secret", json_string((char*)cipher_text));
