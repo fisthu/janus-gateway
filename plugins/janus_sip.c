@@ -2146,21 +2146,26 @@ static void *janus_sip_handler(void *data) {
                     JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
 
                     size_t cipher_length = 0;
-					unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-                    struct AES_ctx ctx;
-                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
-                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
+					unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+//                    struct AES_ctx ctx;
+//                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
+//                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
+
+                    uint8_t buffer[cipher_length];
+                    // decode AES
+                    AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+
                     int text_length = 0;
                     for (int i = 0; i < cipher_length; ++i) {
-                        if (password[i] != 0x10 && password[i] != 0x20) text_length++;
+                        if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
                     }
 
                     char * temp = (char*)malloc(text_length);
-                    memcpy(temp, password, text_length);
+                    memcpy(temp, buffer, text_length);
 
                     JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
 
-                    json_object_set_new(root, "secret", json_string(temp));
+                    json_object_set(root, "secret", json_string(temp));
 
                     json_t *secret2 = json_object_get(root, "secret");
                     JANUS_LOG(LOG_VERB, "new password is >>>> [%s] | %zu\n", json_string_value(secret2), json_string_length(secret2));
