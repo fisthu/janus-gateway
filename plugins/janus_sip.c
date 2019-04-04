@@ -1929,7 +1929,10 @@ static void *janus_sip_handler(void *data) {
 	int error_code = 0;
 	char error_cause[512];
 	json_t *root = NULL;
-	while(g_atomic_int_get(&initialized) && !g_atomic_int_get(&stopping)) {
+
+    uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
+    uint8_t JET_IV[]= "0123456789ABCDEF";
+    while(g_atomic_int_get(&initialized) && !g_atomic_int_get(&stopping)) {
 		msg = g_async_queue_pop(messages);
 		if(msg == &exit_message)
 			break;
@@ -1978,10 +1981,7 @@ static void *janus_sip_handler(void *data) {
         json_t *secret = json_object_get(root, "secret");
         if (secret != NULL) {
             const char * temp_secret_text = json_string_value(secret);
-            uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
-            uint8_t JET_IV[]= "0123456789ABCDEF";
             JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
-
             size_t cipher_length = 0;
             unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
 
@@ -1998,23 +1998,24 @@ static void *janus_sip_handler(void *data) {
 
             JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
-            int text_length = 0;
-            for (int i = 0; i < cipher_length; ++i) {
-                if (buffer[i] != 0x10 && buffer[i] != 0x20) {
-                    JANUS_LOG(LOG_VERB, "%c", buffer[i]);
-                    text_length++;
-                }
-            }
+//            int text_length = 0;
+//            for (int i = 0; i < cipher_length; ++i) {
+//                if (buffer[i] != 0x10 && buffer[i] != 0x20) {
+//                    JANUS_LOG(LOG_VERB, "%c", buffer[i]);
+//                    text_length++;
+//                }
+//            }
 
-            JANUS_LOG(LOG_VERB, "\n text length >>>> [%d]\n", text_length);
+//            JANUS_LOG(LOG_VERB, "\n text length >>>> [%d]\n", text_length);
 
-            char *temp = (char*)malloc(text_length);
-            for (int i = 0; i < text_length; i++) {
-                temp[i] = buffer[i];
-            }
+//            char *temp = (char*)malloc(text_length);
+//            for (int i = 0; i < text_length; i++) {
+//                temp[i] = buffer[i];
+//            }
 
-            JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
-            json_object_set_new(root, "secret", json_string(temp));
+            JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", json_string((char*)buffer));
+
+            json_object_set(root, "secret", json_string((char*)buffer));
 
             json_t *secret2 = json_object_get(root, "secret");
             JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
