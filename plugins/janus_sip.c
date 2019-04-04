@@ -1996,12 +1996,12 @@ static void *janus_sip_handler(void *data) {
 
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
 
-//            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
+            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
             json_object_set(root, "secret", json_string((char*)buffer));
 
-//            json_t *secret2 = json_object_get(root, "secret");
-//            JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
+            json_t *secret2 = json_object_get(root, "secret");
+            JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
         }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
@@ -2232,7 +2232,7 @@ static void *janus_sip_handler(void *data) {
 			session->account.username = g_strdup(user_id);
 			session->account.authuser = g_strdup(authuser_text ? authuser_text : user_id);
 			session->account.secret = secret_text ? g_strdup(secret_text) : NULL;
-            //JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: [%s]\n", session->account.secret);
+            JANUS_LOG(LOG_VERB, ">>>>>>>>>> password: [%s]\n", session->account.secret);
 			session->account.secret_type = secret_type;
 			if(display_name_text) {
 				session->account.display_name = g_strdup(display_name_text);
