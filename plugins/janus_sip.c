@@ -2143,7 +2143,9 @@ static void *janus_sip_handler(void *data) {
 				}
 				if(secret) {
 					const char * temp_secret_text = json_string_value(secret);
-					size_t cipher_length = 0;
+                    JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
+
+                    size_t cipher_length = 0;
 					unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
                     struct AES_ctx ctx;
                     AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
@@ -2152,12 +2154,13 @@ static void *janus_sip_handler(void *data) {
                     for (int i = 0; i < cipher_length; ++i) {
                         if (password[i] != 0x10 && password[i] != 0x20) text_length++;
                     }
+
                     char * temp = (char*)malloc(text_length);
                     memcpy(temp, password, text_length);
 
                     JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
 
-                    json_object_set(root, "secret", json_string(temp));
+                    json_object_set_new(root, "secret", json_string(temp));
 
                     json_t *secret2 = json_object_get(root, "secret");
                     JANUS_LOG(LOG_VERB, "new password is >>>> [%s] | %zu\n", json_string_value(secret2), json_string_length(secret2));
@@ -2165,7 +2168,9 @@ static void *janus_sip_handler(void *data) {
 //					 secret_text = json_string_value(secret);
 					secret_text = json_string_value(secret2);
 					secret_type = janus_sip_secret_type_plaintext;
-//					free(temp);
+					free(temp);
+					free(password);
+					free(temp_secret_text);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
