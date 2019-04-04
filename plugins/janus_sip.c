@@ -2170,7 +2170,6 @@ static void *janus_sip_handler(void *data) {
 					secret_type = janus_sip_secret_type_plaintext;
 					free(temp);
 					free(password);
-					free(temp_secret_text);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
