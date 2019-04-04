@@ -1978,6 +1978,30 @@ static void *janus_sip_handler(void *data) {
 		const char *request_text = json_string_value(request);
 		json_t *result = NULL;
 
+        json_t *secret = json_object_get(root, "secret");
+        if (secret != NULL) {
+            const char * temp_secret_text = json_string_value(secret);
+            JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
+
+            size_t cipher_length = 0;
+            unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+
+            JANUS_LOG(LOG_VERB, " cipher length >>>> [%zu]\n", cipher_length);
+            uint8_t buffer[cipher_length];
+            // decode AES
+            AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+
+            int text_length = 0;
+            for (int i = 0; i < cipher_length; ++i) {
+                if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
+            }
+
+            char * temp = (char*)malloc(text_length);
+            memcpy(temp, buffer, text_length);
+
+            JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
+            json_object_set(root, "secret", json_string(temp));
+        }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
 			JANUS_VALIDATE_JSON_OBJECT(root, register_parameters,
@@ -2142,28 +2166,7 @@ static void *janus_sip_handler(void *data) {
 					goto error;
 				}
 				if(secret) {
-					const char * temp_secret_text = json_string_value(secret);
-                    JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
-
-                    size_t cipher_length = 0;
-					unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-
-                    uint8_t buffer[cipher_length];
-                    // decode AES
-                    AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
-
-                    int text_length = 0;
-                    for (int i = 0; i < cipher_length; ++i) {
-                        if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
-                    }
-
-                    char * temp = (char*)malloc(text_length);
-                    memcpy(temp, buffer, text_length);
-
-                    JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
-
-//					 secret_text = json_string_value(secret);
-					secret_text = temp;
+				    secret_text = json_string_value(secret);
 					secret_type = janus_sip_secret_type_plaintext;
 				} else {
 					secret_text = json_string_value(ha1_secret);
@@ -2546,27 +2549,27 @@ static void *janus_sip_handler(void *data) {
 			if(secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (secret) for authenticating the INVITE\n");
 
-                const char * temp_secret_text = json_string_value(secret);
-                JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
-
-                size_t cipher_length = 0;
-                unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-                uint8_t buffer[cipher_length];
-                // decode AES
-                AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
-
-                int text_length = 0;
-                for (int i = 0; i < cipher_length; ++i) {
-                    if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
-                }
-
-                char * temp = (char*)malloc(text_length);
-                memcpy(temp, buffer, text_length);
+//                const char * temp_secret_text = json_string_value(secret);
+//                JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
+//
+//                size_t cipher_length = 0;
+//                unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+//                uint8_t buffer[cipher_length];
+//                // decode AES
+//                AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+//
+//                int text_length = 0;
+//                for (int i = 0; i < cipher_length; ++i) {
+//                    if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
+//                }
+//
+//                char * temp = (char*)malloc(text_length);
+//                memcpy(temp, buffer, text_length);
 
                 JANUS_LOG(LOG_VERB, ">>>>>>>>>> password22222: %s", temp);
 				g_free(session->account.secret);
-				session->account.secret = g_strdup(temp);
-//				session->account.secret = g_strdup(json_string_value(secret));
+//				session->account.secret = g_strdup(temp);
+				session->account.secret = g_strdup(json_string_value(secret));
 				session->account.secret_type = janus_sip_secret_type_plaintext;
 			} else if(ha1_secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (ha1_secret) for authenticating the INVITE\n");
