@@ -1991,6 +1991,7 @@ static void *janus_sip_handler(void *data) {
             uint8_t *buffer = (uint8_t*) malloc(cipher_length);
             JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
             JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
+            JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
             JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
