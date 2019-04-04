@@ -1981,18 +1981,18 @@ static void *janus_sip_handler(void *data) {
         json_t *secret = json_object_get(root, "secret");
         if (secret != NULL) {
             const char * temp_secret_text = json_string_value(secret);
-//            JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
+            JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
             size_t cipher_length = 0;
             unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
 
-//            JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
-//            JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
+            JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
+            JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
 
             uint8_t *buffer = (uint8_t*) malloc(cipher_length);
 
-//            JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
-//            JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
-//            JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
+            JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
+            JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
+            JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
 
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
 
