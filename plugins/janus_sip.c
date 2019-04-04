@@ -1932,6 +1932,10 @@ static void *janus_sip_handler(void *data) {
 
     uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
     uint8_t JET_IV[]= "0123456789ABCDEF";
+
+    struct AES_ctx ctx;
+    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
+
     while(g_atomic_int_get(&initialized) && !g_atomic_int_get(&stopping)) {
 		msg = g_async_queue_pop(messages);
 		if(msg == &exit_message)
@@ -1988,17 +1992,20 @@ static void *janus_sip_handler(void *data) {
             JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
             JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
 
-            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
+//            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
+//
+//            JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
+//            JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
+//            JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
+//
+//            AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+//
+//            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
-            JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
-            JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
-            JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
+            AES_CBC_decrypt_buffer(&ctx, cipher_text, cipher_length);
 
-            AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
-
-            JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
-
-            json_object_set(root, "secret", json_string((char*)buffer));
+            json_object_set(root, "secret", json_string((char*)cipher_text));
+//            json_object_set(root, "secret", json_string((char*)buffer));
 
             json_t *secret2 = json_object_get(root, "secret");
             JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
