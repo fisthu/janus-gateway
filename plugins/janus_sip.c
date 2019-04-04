@@ -1978,7 +1978,7 @@ static void *janus_sip_handler(void *data) {
         json_t *secret = json_object_get(root, "secret");
         if (secret != NULL) {
             const char * temp_secret_text = json_string_value(secret);
-            uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME should get from machine environment
+            uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
             uint8_t JET_IV[]= "0123456789ABCDEF";
             JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
 
@@ -1989,10 +1989,13 @@ static void *janus_sip_handler(void *data) {
             JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
 
             uint8_t *buffer = (uint8_t*) malloc(cipher_length);
+
             JANUS_LOG(LOG_VERB, " key >>>> [%s]\n", JET_KEY);
             JANUS_LOG(LOG_VERB, " iv >>>> [%s]\n", JET_IV);
             JANUS_LOG(LOG_VERB, " buffer before decrypt >>>> [%s]\n", buffer);
+
             AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+
             JANUS_LOG(LOG_VERB, " buffer after decrypt >>>> [%s]\n", buffer);
 
             int text_length = 0;
@@ -2005,14 +2008,16 @@ static void *janus_sip_handler(void *data) {
 
             JANUS_LOG(LOG_VERB, "\n text length >>>> [%d]\n", text_length);
 
-            char temp[text_length];
+            char *temp = (char*)malloc(text_length);
             for (int i = 0; i < text_length; i++) {
                 temp[i] = buffer[i];
             }
-            //memcpy(temp, buffer, text_length);
 
             JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
             json_object_set_new(root, "secret", json_string(temp));
+
+            json_t *secret2 = json_object_get(root, "secret");
+            JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
         }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
