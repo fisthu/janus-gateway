@@ -2165,7 +2165,6 @@ static void *janus_sip_handler(void *data) {
 //					 secret_text = json_string_value(secret);
 					secret_text = temp;
 					secret_type = janus_sip_secret_type_plaintext;
-					free(temp);
 				} else {
 					secret_text = json_string_value(ha1_secret);
 					secret_type = janus_sip_secret_type_hashed;
@@ -2569,8 +2568,6 @@ static void *janus_sip_handler(void *data) {
 				session->account.secret = g_strdup(temp);
 //				session->account.secret = g_strdup(json_string_value(secret));
 				session->account.secret_type = janus_sip_secret_type_plaintext;
-
-				free(temp);
 			} else if(ha1_secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (ha1_secret) for authenticating the INVITE\n");
 				g_free(session->account.secret);
