@@ -2566,9 +2566,7 @@ static void *janus_sip_handler(void *data) {
 //                char * temp = (char*)malloc(text_length);
 //                memcpy(temp, buffer, text_length);
 
-                JANUS_LOG(LOG_VERB, ">>>>>>>>>> password22222: %s", temp);
 				g_free(session->account.secret);
-//				session->account.secret = g_strdup(temp);
 				session->account.secret = g_strdup(json_string_value(secret));
 				session->account.secret_type = janus_sip_secret_type_plaintext;
 			} else if(ha1_secret) {
