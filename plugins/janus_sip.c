@@ -2147,9 +2147,6 @@ static void *janus_sip_handler(void *data) {
 
                     size_t cipher_length = 0;
 					unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-//                    struct AES_ctx ctx;
-//                    AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
-//                    AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
 
                     uint8_t buffer[cipher_length];
                     // decode AES
@@ -2165,13 +2162,8 @@ static void *janus_sip_handler(void *data) {
 
                     JANUS_LOG(LOG_VERB, " temp >>>> [%s]\n", temp);
 
-                    json_object_set(root, "secret", json_string(temp));
-
-                    json_t *secret2 = json_object_get(root, "secret");
-                    JANUS_LOG(LOG_VERB, "new password is >>>> [%s] | %zu\n", json_string_value(secret2), json_string_length(secret2));
-
 //					 secret_text = json_string_value(secret);
-					secret_text = json_string_value(secret2);
+					secret_text = temp;
 					secret_type = janus_sip_secret_type_plaintext;
 					free(temp);
 				} else {
@@ -2555,17 +2547,30 @@ static void *janus_sip_handler(void *data) {
 			if(secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (secret) for authenticating the INVITE\n");
 
-//                const char * temp_secret_text = json_string_value(secret);
-//                size_t cipher_length = 0;
-//                unsigned char * password = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
-//                struct AES_ctx ctx;
-//                AES_init_ctx_iv(&ctx, JET_KEY, JET_IV);
-//                AES_CBC_decrypt_buffer(&ctx, password, cipher_length);
-                JANUS_LOG(LOG_VERB, ">>>>>>>>>> password22222: %s", json_string_value(secret));
+                const char * temp_secret_text = json_string_value(secret);
+                JANUS_LOG(LOG_VERB, " temp00 >>>> [%s]\n", temp_secret_text);
+
+                size_t cipher_length = 0;
+                unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
+                uint8_t buffer[cipher_length];
+                // decode AES
+                AES_CBC_decrypt_buffer(buffer, cipher_text, cipher_length, JET_KEY, JET_IV);
+
+                int text_length = 0;
+                for (int i = 0; i < cipher_length; ++i) {
+                    if (buffer[i] != 0x10 && buffer[i] != 0x20) text_length++;
+                }
+
+                char * temp = (char*)malloc(text_length);
+                memcpy(temp, buffer, text_length);
+
+                JANUS_LOG(LOG_VERB, ">>>>>>>>>> password22222: %s", temp);
 				g_free(session->account.secret);
-				session->account.secret = g_strdup(json_string_value(secret));
-//				session->account.secret = g_strdup((char*)password);
+				session->account.secret = g_strdup(temp);
+//				session->account.secret = g_strdup(json_string_value(secret));
 				session->account.secret_type = janus_sip_secret_type_plaintext;
+
+				free(temp);
 			} else if(ha1_secret) {
 				JANUS_LOG(LOG_VERB, "Updating credentials (ha1_secret) for authenticating the INVITE\n");
 				g_free(session->account.secret);
