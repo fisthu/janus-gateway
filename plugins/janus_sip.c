@@ -1983,15 +1983,15 @@ static void *janus_sip_handler(void *data) {
         json_t *secret = json_object_get(root, "secret");
         if (secret != NULL) {
             const char * temp_secret_text = json_string_value(secret);
-            JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
+//            JANUS_LOG(LOG_VERB, " encrypted >>>> [%s]\n", temp_secret_text);
             size_t cipher_length = 0;
             unsigned char * cipher_text = b64_decode_ex(temp_secret_text, strlen(temp_secret_text), &cipher_length);
 
 //            uint8_t cipher_text[] = {0x8f, 0xcf, 0xd7, 0x73, 0xcf, 0x30, 0xf9, 0x5b, 0x27, 0xae, 0xb2, 0xc3, 0x69, 0x81, 0x81, 0x2d, 0xe9, 0x30, 0x9f, 0x3a, 0x50, 0x95, 0x30, 0x41, 0x4a, 0x74, 0x82, 0xc5, 0x24, 0x5f, 0x82, 0xff};
 //            size_t cipher_length = sizeof(cipher_text);
 
-            JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
-            JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
+//            JANUS_LOG(LOG_VERB, " base64 cipher text >>>> [%s]\n", cipher_text);
+//            JANUS_LOG(LOG_VERB, " base64 cipher length >>>> [%zu]\n", cipher_length);
 
 //            uint8_t *buffer = (uint8_t*) malloc(cipher_length);
 //
@@ -2009,8 +2009,8 @@ static void *janus_sip_handler(void *data) {
             json_object_set(root, "secret", json_string((char*)cipher_text));
 //            json_object_set(root, "secret", json_string((char*)buffer));
 
-            json_t *secret2 = json_object_get(root, "secret");
-            JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
+//            json_t *secret2 = json_object_get(root, "secret");
+//            JANUS_LOG(LOG_VERB, " final password >>>> [%s]\n", json_string_value(secret2));
         }
 		if(!strcasecmp(request_text, "register")) {
 			/* Send a REGISTER */
