@@ -566,6 +566,8 @@ static GThread *handler_thread;
 static void *janus_sip_handler(void *data);
 static void janus_sip_hangup_media_internal(janus_plugin_session *handle);
 
+static uint8_t *JET_KEY = NULL;
+
 typedef struct janus_sip_message {
 	janus_plugin_session *handle;
 	char *transaction;
@@ -1337,6 +1339,9 @@ int janus_sip_init(janus_callbacks *callback, const char *config_path) {
 			JANUS_LOG(LOG_WARN, "Notification of events to handlers disabled for %s\n", JANUS_SIP_NAME);
 		}
 
+        item = janus_config_get(config, config_general, janus_config_type_item, "jet_key");
+		if (item != NULL && item->value != NULL) JET_KEY = g_strdup(item->value);
+
 		janus_config_destroy(config);
 	}
 	config = NULL;
@@ -1930,7 +1935,7 @@ static void *janus_sip_handler(void *data) {
 	char error_cause[512];
 	json_t *root = NULL;
 
-    uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
+//    uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
     uint8_t JET_IV[]= "0123456789ABCDEF";
     struct AES_ctx ctx;
 
