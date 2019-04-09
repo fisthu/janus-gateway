@@ -573,6 +573,7 @@ static void *janus_sip_handler(void *data);
 static void janus_sip_hangup_media_internal(janus_plugin_session *handle);
 
 static uint8_t *JET_KEY = NULL;
+static uint8_t *JET_IV = NULL;
 
 typedef struct janus_sip_message {
 	janus_plugin_session *handle;
@@ -1356,6 +1357,9 @@ int janus_sip_init(janus_callbacks *callback, const char *config_path) {
         item = janus_config_get(config, config_general, janus_config_type_item, "jet_key");
 		if (item != NULL && item->value != NULL) JET_KEY = g_strdup(item->value);
 
+        item = janus_config_get(config, config_general, janus_config_type_item, "jet_iv");
+		if (item != NULL && item->value != NULL) JET_IV = g_strdup(item->value);
+
 		janus_config_destroy(config);
 	}
 	config = NULL;
@@ -1949,9 +1953,6 @@ static void *janus_sip_handler(void *data) {
 	int error_code = 0;
 	char error_cause[512];
 	json_t *root = NULL;
-
-//    uint8_t JET_KEY[] = "thisisasecretkeythisisasecretkey"; // FIXME
-    uint8_t JET_IV[]= "0123456789ABCDEF";
     struct AES_ctx ctx;
 
     while(g_atomic_int_get(&initialized) && !g_atomic_int_get(&stopping)) {
