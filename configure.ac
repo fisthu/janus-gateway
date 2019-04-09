@@ -1,4 +1,4 @@
-AC_INIT([Janus WebRTC Server],[0.6.0],[https://github.com/meetecho/janus-gateway],[janus-gateway],[https://janus.conf.meetecho.com])
+AC_INIT([Janus WebRTC Server],[0.7.0],[https://github.com/meetecho/janus-gateway],[janus-gateway],[https://janus.conf.meetecho.com])
 AC_LANG(C)
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
@@ -53,39 +53,38 @@ CFLAGS="$CFLAGS \
 	-Wunused \
 	-Wwrite-strings"
 
-AM_CONDITIONAL([USE_CLANG], [test "x$CC" = "xclang"])
-AM_COND_IF([USE_CLANG],
+case "$CC" in
+clang*)
 	# Specific clang flags
-	[CFLAGS="$CFLAGS \
+	CFLAGS="$CFLAGS \
 		-Wno-cast-align \
 		-Wno-initializer-overrides"
-	],
+;;
+*)
 	# Specific gcc flags
-	[CFLAGS="$CFLAGS \
+	CFLAGS="$CFLAGS \
 		-Wcast-align \
 		-Wno-override-init \
 		-Wunsafe-loop-optimizations \
-		-Wunused-but-set-variable"	
-	]
-)
+		-Wunused-but-set-variable"
+esac
 
-# add rdynamic to LDFLAGS
-LDFLAGS="$LDFLAGS \
-	-Wl,--export-dynamic"
-
-JANUS_VERSION=60
+JANUS_VERSION=70
 AC_SUBST(JANUS_VERSION)
-JANUS_VERSION_STRING="0.6.0"
+JANUS_VERSION_STRING="0.7.0"
 AC_SUBST(JANUS_VERSION_STRING)
 
 case "$host_os" in
 darwin*)
 	CFLAGS="$CFLAGS -I/usr/local/opt/openssl/include -I/usr/local/include"
+	# add rdynamic to LDFLAGS
+	LDFLAGS="$LDFLAGS -Wl,-export_dynamic"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/opt/openssl/lib -L/opt/local/lib -L/usr/local/libsrtp/lib"
 	AM_CONDITIONAL([DARWIN_OS], true)
 	AM_CONDITIONAL([HAS_DTLS_WINDOW_SIZE], false)
 ;;
 *)
+	LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
 	AM_CONDITIONAL([DARWIN_OS], false)
 	AM_CONDITIONAL([HAS_DTLS_WINDOW_SIZE], true)
 esac
@@ -421,17 +420,17 @@ AM_CONDITIONAL([ENABLE_SCTP], [test "x$enable_data_channels" = "xyes"])
 PKG_CHECK_MODULES([LIBCURL],
                   [libcurl],
                   [
+                    AC_DEFINE(HAVE_LIBCURL)
+                    JANUS_MANUAL_LIBS+=" -lcurl"
                     AS_IF(
                       [test "x$enable_turn_rest_api" != "xno"],
                       [
-                        AC_DEFINE(HAVE_LIBCURL)
-                        JANUS_MANUAL_LIBS+=" -lcurl"
+                        AC_DEFINE(HAVE_TURNRESTAPI)
                         enable_turn_rest_api=yes
                       ])
                     AS_IF([test "x$enable_sample_event_handler" != "xno"],
                       [
                         AC_DEFINE(HAVE_SAMPLEEVH)
-                        JANUS_MANUAL_LIBS+=" -lcurl"
                         enable_sample_event_handler=yes
                       ])
                   ],
