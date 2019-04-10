@@ -1354,10 +1354,11 @@ int janus_sip_init(janus_callbacks *callback, const char *config_path) {
 			JANUS_LOG(LOG_WARN, "Notification of events to handlers disabled for %s\n", JANUS_SIP_NAME);
 		}
 
-        item = janus_config_get(config, config_general, janus_config_type_item, "jet_key");
-		if (item != NULL && item->value != NULL) JET_KEY = g_strdup(item->value);
+		janus_config_category *config_jet_secret = janus_config_get_create(config, NULL, janus_config_type_category, "jet-secret");
+        item = janus_config_get(config, config_jet_secret, janus_config_type_item, "jet_key");
+        if (item != NULL && item->value != NULL) JET_KEY = g_strdup(item->value);
 
-        item = janus_config_get(config, config_general, janus_config_type_item, "jet_iv");
+        item = janus_config_get(config, config_jet_secret, janus_config_type_item, "jet_iv");
 		if (item != NULL && item->value != NULL) JET_IV = g_strdup(item->value);
 
 		janus_config_destroy(config);
